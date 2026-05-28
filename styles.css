@@ -1,0 +1,221 @@
+:root {
+  --bg-color: rgba(20, 20, 25, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-color: #ffffff;
+  --text-muted: #a0a0b0;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --secondary: #10b981;
+  --secondary-hover: #059669;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --warning: #f59e0b;
+  --warning-hover: #d97706;
+  --disabled: #4b5563;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
+  background-color: transparent;
+  overflow: hidden;
+  user-select: none;
+}
+
+.container {
+  background-color: var(--bg-color);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  -webkit-app-region: drag;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: color 0.2s;
+  padding: 0;
+  box-shadow: none;
+}
+
+.close-btn:hover {
+  color: var(--danger);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  padding: 0;
+  box-shadow: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.icon-btn:hover {
+  opacity: 1;
+}
+
+.timer-section {
+  text-align: center;
+  margin-bottom: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.time-display {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.status-display {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.input-section {
+  margin-bottom: 16px;
+}
+
+input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 10px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  border-color: var(--primary);
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button:disabled {
+  background-color: var(--disabled) !important;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.primary-btn {
+  background-color: var(--primary);
+  color: white;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.danger-btn {
+  background-color: var(--danger);
+  color: white;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background-color: var(--danger-hover);
+}
+
+.warning-btn {
+  background-color: var(--warning);
+  color: white;
+}
+
+.warning-btn:hover:not(:disabled) {
+  background-color: var(--warning-hover);
+}
+
+.secondary-btn {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background-color: var(--secondary-hover);
+}
+
+.break-section {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.break-info {
+  font-size: 13px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+#accumulatedBreak {
+  font-weight: bold;
+  color: var(--secondary);
+}

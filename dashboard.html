@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pomodoro Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #6366f1;
+    }
+
+    .chart-container {
+      background: #1e1e24;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    #totalTime {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #10b981;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Productivity Dashboard</h1>
+    <div id="totalTime">Total Work Today: 0 minutes</div>
+    <div class="chart-container">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const fs = require('fs');
+    const path = require('path');
+
+    async function loadData() {
+      try {
+        const dataFile = path.join(__dirname, 'data.json');
+        if (!fs.existsSync(dataFile)) {
+          throw new Error('Data file not found.');
+        }
+        const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+
+        // Process data: aggregate by topic
+        const topicTotals = {};
+        const pauseTotals = {};
+        let totalMinutes = 0;
+
+        // Filter for today only
+        const today = new Date().toDateString();
+
+        data.forEach(session => {
+          const sessionDate = new Date(session.timestamp).toDateString();
+          if (sessionDate === today) {
+            const topic = session.topic || 'General';
+            topicTotals[topic] = (topicTotals[topic] || 0) + session.minutes;
+            pauseTotals[topic] = (pauseTotals[topic] || 0) + (session.pauseMinutes || 0);
+            totalMinutes += session.minutes;
+          }
+        });
+
+        document.getElementById('totalTime').innerText = `Total Work Today: ${totalMinutes} minutes`;
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(topicTotals),
+            datasets: [{
+              label: 'Minutes Worked',
+              data: Object.values(topicTotals),
+              backgroundColor: 'rgba(16, 185, 129, 0.7)',
+              borderColor: 'rgba(16, 185, 129, 1)',
+              borderWidth: 1
+            }, {
+              label: 'Minutes Paused',
+              data: Object.keys(topicTotals).map(topic => Math.round((pauseTotals[topic] || 0) * 10) / 10),
+              backgroundColor: 'rgba(245, 158, 11, 0.7)',
+              borderColor: 'rgba(245, 158, 11, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: '#a0a0b0'
+                }
+              },
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: '#a0a0b0'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#ffffff'
+                }
+              }
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById('totalTime').innerText = "No data yet. Go work!";
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+
+</html>

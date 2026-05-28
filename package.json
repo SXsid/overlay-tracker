@@ -1,0 +1,16 @@
+{
+  "name": "pomodoro-overlay-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "electron": "^42.2.0"
+  }
+}

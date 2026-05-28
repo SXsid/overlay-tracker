@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Pomodoro Overlay</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="title">POMODORO OVERLAY</span>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button id="dashboardBtn" class="icon-btn">📊</button>
+        <button id="closeBtn" class="close-btn">&times;</button>
+      </div>
+    </div>
+    
+    <div class="timer-section">
+      <div id="timeDisplay" class="time-display">25:00</div>
+      <div id="statusDisplay" class="status-display">Ready to Work</div>
+    </div>
+
+    <div class="input-section">
+      <input type="text" id="topicInput" placeholder="What are you working on?" value="Coding">
+    </div>
+
+    <div class="controls">
+      <button id="startBtn" class="primary-btn">Start</button>
+      <button id="pauseBtn" class="warning-btn" style="display: none;">Pause</button>
+      <button id="stopBtn" class="danger-btn">Stop</button>
+    </div>
+
+    <div class="break-section">
+      <div class="break-info">
+        Accumulated Break: <span id="accumulatedBreak">0</span> min
+      </div>
+      <button id="takeBreakBtn" class="secondary-btn" disabled>Take Break</button>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
