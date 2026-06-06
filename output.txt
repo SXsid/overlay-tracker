@@ -1,0 +1,10 @@
+dashboard.html
+data.json
+index.html
+main.js
+node_modules
+output.txt
+package.json
+package-lock.json
+renderer.js
+styles.css
