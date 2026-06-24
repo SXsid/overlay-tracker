@@ -136,6 +136,7 @@
     <div class="tabs">
       <button id="tabToday" class="tab active" onclick="switchTab('today')">Today</button>
       <button id="tabCumulative" class="tab" onclick="switchTab('cumulative')">Cumulative</button>
+      <button id="tabJobTracker" class="tab" onclick="switchTab('jobtracker')">Job Tracker</button>
     </div>
 
     <!-- TODAY VIEW -->
@@ -176,6 +177,48 @@
         </div>
         <div class="chart-container">
           <canvas id="topicChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB TRACKER VIEW -->
+    <div id="viewJobTracker" class="view">
+      <div class="stats-grid">
+        <div class="stats-card">
+          <div class="stat-value" id="jobsAppliedToday">0</div>
+          <div class="stat-label">Applications Today</div>
+        </div>
+        <div class="stats-card stat-pause">
+          <div class="stat-value" id="jobsDailyTarget">10</div>
+          <div class="stat-label">Daily Target</div>
+        </div>
+      </div>
+
+      <div class="input-card" style="background: #1e1e24; padding: 20px; border-radius: 16px; margin-bottom: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);">
+        <h3 style="margin-top:0; color:#fff; font-size:18px; font-weight: 600;">Log New Applications</h3>
+        <div style="display:flex; justify-content:center; align-items:center; gap: 10px;">
+          <input type="number" id="jobCountInput" min="1" value="1" style="padding: 10px 15px; border-radius: 8px; border: none; background: #2a2a35; color: #fff; font-size: 16px; width: 80px; text-align:center; outline: none; font-family: 'Inter', sans-serif;">
+          <button onclick="logJobs()" style="padding: 10px 25px; border-radius: 8px; border: none; background: #6366f1; color: #fff; font-weight: 600; cursor: pointer; font-size: 16px; transition: background 0.2s; font-family: 'Inter', sans-serif;">Log Applications</button>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-container">
+          <canvas id="jobChart"></canvas>
+        </div>
+        <div class="strategy-card" style="background: #1e1e24; padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); text-align: left; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);">
+          <h3 style="margin-top:0; color:#6366f1; font-size: 20px; font-weight:800;">Applying Strategy</h3>
+          <p style="color:#a0a0b0; font-size:14px; line-height: 1.6;">Don't wait for them to find you. Be proactive.</p>
+          <ul style="color:#ffffff; font-size:14px; line-height: 1.6; padding-left: 20px; margin-bottom: 0;">
+            <li style="margin-bottom:12px;"><strong>Find Contacts:</strong> Use <span style="color:#10b981; font-weight:600;">Apollo.io</span> or <span style="color:#10b981; font-weight:600;">Hunter.io</span> to find Engineering Managers, CTOs, or Founders. Avoid HR if possible.</li>
+            <li style="margin-bottom:12px;"><strong>Setup Email:</strong> Register a professional domain (e.g., firstname.dev) to ensure high deliverability and professional appearance.</li>
+            <li style="margin-bottom:12px;"><strong>Cold Email Template:</strong> Keep it short and value-driven.<br>
+              <div style="background: #2a2a35; padding: 12px; border-radius: 8px; margin-top: 8px; font-style: italic; color: #a0a0b0;">
+                "Hi [Name], I'm a Backend Dev who loves what you're doing at [Company]. I recently built [Project] using [Tech Stack] and would love to bring this experience to your team. Let me know if you have 10 mins to chat. Here is my GitHub: [Link]."
+              </div>
+            </li>
+            <li><strong>Follow Up:</strong> Send a polite follow-up after 3 days if no response. Persistence is key.</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -430,6 +473,109 @@
       }
     }
 
+    const jobDataFile = path.join(__dirname, 'jobs_data.json');
+    let jobChartInstance = null;
+
+    function loadJobData() {
+      try {
+        if (!fs.existsSync(jobDataFile)) {
+          fs.writeFileSync(jobDataFile, JSON.stringify([]));
+        }
+        const jobData = JSON.parse(fs.readFileSync(jobDataFile, 'utf8'));
+
+        const dailyCounts = {};
+        let todayCount = 0;
+        
+        const now = new Date();
+        const fmtDate = (d) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        };
+        const todayStr = fmtDate(now);
+
+        jobData.forEach(entry => {
+          if (!entry.timestamp) return;
+          const dateObj = new Date(entry.timestamp);
+          const dateStr = fmtDate(dateObj);
+          dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + entry.count;
+          if (dateStr === todayStr) {
+            todayCount += entry.count;
+          }
+        });
+
+        document.getElementById('jobsAppliedToday').innerText = todayCount;
+
+        // Prepare Chart Data
+        const sortedDates = Object.keys(dailyCounts).sort();
+        if (!sortedDates.includes(todayStr)) {
+          sortedDates.push(todayStr);
+          dailyCounts[todayStr] = 0;
+          sortedDates.sort();
+        }
+        
+        const recentDates = sortedDates.slice(-14);
+        const chartData = recentDates.map(date => dailyCounts[date]);
+
+        const ctxJob = document.getElementById('jobChart').getContext('2d');
+        if (jobChartInstance) {
+          jobChartInstance.destroy();
+        }
+        jobChartInstance = new Chart(ctxJob, {
+          type: 'bar',
+          data: {
+            labels: recentDates,
+            datasets: [{
+              label: 'Applications Sent',
+              data: chartData,
+              backgroundColor: 'rgba(99, 102, 241, 0.7)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              borderWidth: 1,
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: "Job Applications Trend (Last 14 Days)", color: '#ffffff', font: { size: 18, family: "'Inter', sans-serif", weight: '600' } }
+            },
+            scales: {
+              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#a0a0b0', stepSize: 1 } },
+              x: { grid: { display: false }, ticks: { color: '#a0a0b0' } }
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error("Error loading job data:", err);
+      }
+    }
+
+    function logJobs() {
+      const countInput = document.getElementById('jobCountInput');
+      const count = parseInt(countInput.value, 10);
+      if (isNaN(count) || count <= 0) return;
+
+      try {
+        let jobData = [];
+        if (fs.existsSync(jobDataFile)) {
+          jobData = JSON.parse(fs.readFileSync(jobDataFile, 'utf8'));
+        }
+        jobData.push({
+          count: count,
+          timestamp: new Date().toISOString()
+        });
+        fs.writeFileSync(jobDataFile, JSON.stringify(jobData, null, 2));
+        
+        countInput.value = '1';
+        loadJobData();
+      } catch (err) {
+        console.error("Error saving job data:", err);
+      }
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -437,13 +583,17 @@
       if (tabId === 'today') {
         document.getElementById('viewToday').classList.add('active');
         document.getElementById('tabToday').classList.add('active');
-      } else {
+      } else if (tabId === 'cumulative') {
         document.getElementById('viewCumulative').classList.add('active');
         document.getElementById('tabCumulative').classList.add('active');
+      } else if (tabId === 'jobtracker') {
+        document.getElementById('viewJobTracker').classList.add('active');
+        document.getElementById('tabJobTracker').classList.add('active');
       }
     }
 
     loadData();
+    loadJobData();
   </script>
 </body>
 
